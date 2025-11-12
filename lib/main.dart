@@ -1,4 +1,4 @@
-import 'package:demo_repo/screens/launcher.dart';
+import 'package:demo_repo/my_app.dart';
 import 'package:flutter/material.dart';
 
 void main() {
