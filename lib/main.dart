@@ -1,4 +1,4 @@
-import 'package:demo_repo/my_app.dart';
+import 'package:demo_repo/screens/launcher.dart' show Launcher;
 import 'package:flutter/material.dart';
 
 void main() {
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
       ),
       home: const Launcher(),
     );
