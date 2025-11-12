@@ -1,4 +1,4 @@
-import 'package:demo_repo/my_app.dart';
+import 'package:demo_repo/firstscreen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const Launcher(),
+      home: const FirstScreen(),
     );
   }
 }
