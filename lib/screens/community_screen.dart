@@ -116,7 +116,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  Future<void> _toggleLike(String postId, List<dynamic> currentLikes) async {
+  Future<void> _toggleLike(String postId) async {
     final l10n = AppLocalizations.of(context)!;
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
@@ -132,6 +132,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
           SnackBar(content: Text(l10n.errorUpdatingLike(e.toString()))),
         );
       }
+      rethrow; // Allow PostCard to handle the error by reverting state
     }
   }
 
@@ -223,7 +224,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
 class _PostList extends StatelessWidget {
   final bool isMyPosts;
-  final Function(String, List<dynamic>) onToggleLike;
+  final Future<void> Function(String) onToggleLike;
   final Function(Post) onEdit;
   final Function(String) onDelete;
 
@@ -309,146 +310,233 @@ class _PostList extends StatelessWidget {
 
         return RefreshIndicator(
           onRefresh: () async {
-            // StreamBuilder updates automatically, but this provides visual feedback
             await Future.delayed(const Duration(seconds: 1));
           },
           child: ListView.builder(
             itemCount: posts.length,
             itemBuilder: (context, index) {
               final post = posts[index];
-              final isLiked = post.likes.contains(currentUserEmail);
-              final date = post.createdAt.toLocal();
-              final isAuthor = post.userEmail == currentUserEmail;
-
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primary,
-                            child: Text(
-                              (post.userEmail ?? '?')[0].toUpperCase(),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  post.userEmail ?? l10n.unknown,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  DateFormat('MMM d, h:mm a').format(date),
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isAuthor)
-                            PopupMenuButton(
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.edit, size: 20),
-                                      const SizedBox(width: 8),
-                                      Text(l10n.edit),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.delete,
-                                        size: 20,
-                                        color: Colors.red,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        l10n.delete,
-                                        style: const TextStyle(
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  onEdit(post);
-                                } else if (value == 'delete') {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text(l10n.deletePost),
-                                      content: Text(l10n.confirmDeletePost),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: Text(l10n.cancel),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            onDelete(post.id);
-                                          },
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: Colors.red,
-                                          ),
-                                          child: Text(l10n.delete),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(post.content),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              isLiked
-                                  ? Icons.thumb_up
-                                  : Icons.thumb_up_outlined,
-                              color: isLiked
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
-                            ),
-                            onPressed: () => onToggleLike(post.id, post.likes),
-                          ),
-                          Text('${post.likes.length} ${l10n.likes}'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+              return PostCard(
+                key: ValueKey(post.id), // Important for state preservation
+                post: post,
+                currentUserEmail: currentUserEmail,
+                onToggleLike: onToggleLike,
+                onEdit: onEdit,
+                onDelete: onDelete,
               );
             },
           ),
         );
       },
+    );
+  }
+}
+
+class PostCard extends StatefulWidget {
+  final Post post;
+  final String? currentUserEmail;
+  final Future<void> Function(String) onToggleLike;
+  final Function(Post) onEdit;
+  final Function(String) onDelete;
+
+  const PostCard({
+    super.key,
+    required this.post,
+    required this.currentUserEmail,
+    required this.onToggleLike,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  late bool isLiked;
+  late int likeCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateStateFromPost();
+  }
+
+  @override
+  void didUpdateWidget(PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update from widget if the remote state might have changed
+    // independent of our local optimistic update, or to sync up eventually.
+    // For now, we trust the stream to eventually be consistent, but we
+    // don't want to overwrite our optimistic state immediately if the stream
+    // lags behind.
+    // However, since the stream is the source of truth, we should probably
+    // sync with it if it differs, UNLESS we are currently toggling?
+    // A simple approach: always sync with widget, but when toggling,
+    // we might see a flicker if the stream is slow.
+    // Better approach for "instant" feel:
+    // Initialize state. When user taps, update local state.
+    // If stream updates, we update local state.
+    // If stream update matches our optimistic state, great.
+    // If stream update is "old" (e.g. before our toggle), we might flicker.
+    // But usually Supabase Realtime is fast.
+    // Let's just sync for now.
+    _updateStateFromPost();
+  }
+
+  void _updateStateFromPost() {
+    isLiked = widget.post.likes.contains(widget.currentUserEmail);
+    likeCount = widget.post.likes.length;
+  }
+
+  Future<void> _handleLike() async {
+    final previousIsLiked = isLiked;
+    final previousLikeCount = likeCount;
+
+    setState(() {
+      if (isLiked) {
+        isLiked = false;
+        likeCount--;
+      } else {
+        isLiked = true;
+        likeCount++;
+      }
+    });
+
+    try {
+      await widget.onToggleLike(widget.post.id);
+    } catch (e) {
+      // Revert on error
+      if (mounted) {
+        setState(() {
+          isLiked = previousIsLiked;
+          likeCount = previousLikeCount;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final date = widget.post.createdAt.toLocal();
+    final isAuthor = widget.post.userEmail == widget.currentUserEmail;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: Text(
+                    (widget.post.userEmail ?? '?')[0].toUpperCase(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.post.userEmail ?? l10n.unknown,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        DateFormat('MMM d, h:mm a').format(date),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                if (isAuthor)
+                  PopupMenuButton(
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.edit, size: 20),
+                            const SizedBox(width: 8),
+                            Text(l10n.edit),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.delete,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        widget.onEdit(widget.post);
+                      } else if (value == 'delete') {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(l10n.deletePost),
+                            content: Text(l10n.confirmDeletePost),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(l10n.cancel),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  widget.onDelete(widget.post.id);
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.red,
+                                ),
+                                child: Text(l10n.delete),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(widget.post.content),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                    color: isLiked
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                  ),
+                  onPressed: _handleLike,
+                ),
+                Text('$likeCount ${l10n.likes}'),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
