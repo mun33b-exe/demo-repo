@@ -266,4 +266,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get userNotLoggedIn => 'صارف لاگ ان نہیں ہے';
+
+  @override
+  String get welcomeMessage => 'Welcome to SmartFarm';
 }

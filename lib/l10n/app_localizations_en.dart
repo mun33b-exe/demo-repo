@@ -265,4 +265,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userNotLoggedIn => 'User not logged in';
+
+  @override
+  String get welcomeMessage => 'Welcome to SmartFarm';
 }

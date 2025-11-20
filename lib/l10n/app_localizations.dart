@@ -595,6 +595,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User not logged in'**
   String get userNotLoggedIn;
+
+  /// No description provided for @welcomeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to SmartFarm'**
+  String get welcomeMessage;
 }
 
 class _AppLocalizationsDelegate
