@@ -122,10 +122,12 @@ class _WeatherCardState extends State<WeatherCard> {
 
     if (_weather == null) return const SizedBox.shrink();
 
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade400, Colors.blue.shade800],
+          colors: [primaryColor, primaryColor.withOpacity(0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
