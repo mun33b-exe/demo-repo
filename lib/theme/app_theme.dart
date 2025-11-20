@@ -36,6 +36,11 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        indicatorColor: secondaryAmber,
+      ),
       cardTheme: CardThemeData(
         color: lightSurface,
         elevation: 2,
@@ -66,6 +71,11 @@ class AppTheme {
         backgroundColor: darkSurface,
         foregroundColor: darkText,
         elevation: 0,
+      ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        indicatorColor: secondaryAmber,
       ),
       cardTheme: CardThemeData(
         color: darkSurface,
