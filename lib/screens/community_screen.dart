@@ -58,15 +58,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
     try {
       await Supabase.instance.client.from('posts').delete().eq('id', postId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.postDeletedSuccess)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.postDeletedSuccess)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.errorDeletingPost(e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorDeletingPost(e.toString()))),
+        );
       }
     }
   }
@@ -76,7 +76,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     final controller = TextEditingController(text: post.content);
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(l10n.editPost),
         content: TextField(
           controller: controller,
@@ -85,29 +85,28 @@ class _CommunityScreenState extends State<CommunityScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
               if (controller.text.trim().isEmpty) return;
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
+              final messenger = ScaffoldMessenger.of(context);
               try {
                 await Supabase.instance.client
                     .from('posts')
                     .update({'content': controller.text.trim()})
                     .eq('id', post.id);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.postUpdatedSuccess)),
-                  );
-                }
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.postUpdatedSuccess)),
+                );
               } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.errorUpdatingPost(e.toString()))),
-                  );
-                }
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(l10n.errorUpdatingPost(e.toString())),
+                  ),
+                );
               }
             },
             child: Text(l10n.update),
@@ -122,25 +121,16 @@ class _CommunityScreenState extends State<CommunityScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
 
-    final email = user.email!;
-    final List<String> likes = List<String>.from(currentLikes);
-
-    if (likes.contains(email)) {
-      likes.remove(email);
-    } else {
-      likes.add(email);
-    }
-
     try {
-      await Supabase.instance.client
-          .from('posts')
-          .update({'likes': likes})
-          .eq('id', postId);
+      await Supabase.instance.client.rpc(
+        'toggle_like',
+        params: {'post_id': postId},
+      );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.errorUpdatingLike(e.toString()))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorUpdatingLike(e.toString()))),
+        );
       }
     }
   }
@@ -201,7 +191,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       decoration: InputDecoration(
                         hintText: l10n.askSomething,
                         border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -299,16 +291,12 @@ class _PostList extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isMyPosts
-                      ? l10n.haventPosted
-                      : l10n.noPostsYet,
+                  isMyPosts ? l10n.haventPosted : l10n.noPostsYet,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  isMyPosts
-                      ? l10n.shareThoughts
-                      : l10n.startConversation,
+                  isMyPosts ? l10n.shareThoughts : l10n.startConversation,
                   style: Theme.of(context).textTheme.bodySmall,
                   textAlign: TextAlign.center,
                 ),
@@ -385,9 +373,18 @@ class _PostList extends StatelessWidget {
                                   value: 'delete',
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.delete, size: 20, color: Colors.red),
+                                      const Icon(
+                                        Icons.delete,
+                                        size: 20,
+                                        color: Colors.red,
+                                      ),
                                       const SizedBox(width: 8),
-                                      Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                                      Text(
+                                        l10n.delete,
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -400,12 +397,11 @@ class _PostList extends StatelessWidget {
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: Text(l10n.deletePost),
-                                      content: Text(
-                                        l10n.confirmDeletePost,
-                                      ),
+                                      content: Text(l10n.confirmDeletePost),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.pop(context),
+                                          onPressed: () =>
+                                              Navigator.pop(context),
                                           child: Text(l10n.cancel),
                                         ),
                                         TextButton(
