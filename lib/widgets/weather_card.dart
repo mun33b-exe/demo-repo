@@ -220,9 +220,64 @@ class _WeatherCardState extends State<WeatherCard> {
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+            const Divider(color: Colors.white24),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _weather!.dailyForecasts.length,
+                itemBuilder: (context, index) {
+                  final forecast = _weather!.dailyForecasts[index];
+                  return Container(
+                    width: 70,
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white10),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          index == 0 ? 'Today' : _getDayName(forecast.date),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Icon(
+                          _getWeatherIcon(forecast.weatherCode),
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${forecast.maxTemp.round()}°/${forecast.minTemp.round()}°',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  String _getDayName(DateTime date) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[date.weekday - 1];
   }
 }

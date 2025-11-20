@@ -48,7 +48,7 @@ class WeatherService {
   Future<WeatherModel> getWeather(double lat, double long) async {
     final response = await http.get(
       Uri.parse(
-        '$_baseUrl?latitude=$lat&longitude=$long&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m',
+        '$_baseUrl?latitude=$lat&longitude=$long&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=10',
       ),
     );
 
