@@ -1,0 +1,78 @@
+-- Enable UUID extension if not enabled
+create extension if not exists "uuid-ossp";
+
+-- 1. Table Creation
+
+-- Products Table
+create table public.products (
+  id uuid primary key default uuid_generate_v4(),
+  name text not null,
+  description text,
+  price numeric not null,
+  image_url text,
+  seller_email text,
+  created_at timestamptz default now()
+);
+
+-- Posts Table
+create table public.posts (
+  id uuid primary key default uuid_generate_v4(),
+  content text not null,
+  user_email text,
+  likes text[] default array[]::text[],
+  created_at timestamptz default now()
+);
+
+-- 2. Storage Bucket
+-- Note: You must create the bucket 'product-images' in the Storage dashboard and make it Public.
+-- This SQL just sets up policies assuming the bucket exists.
+insert into storage.buckets (id, name, public)
+values ('product-images', 'product-images', true)
+on conflict (id) do nothing;
+
+-- 3. RLS Policies
+
+-- Enable RLS
+alter table public.products enable row level security;
+alter table public.posts enable row level security;
+
+-- Products Policies
+create policy "Public read access for products"
+on public.products for select
+to anon, authenticated
+using (true);
+
+create policy "Authenticated users can insert products"
+on public.products for insert
+to authenticated
+with check (true);
+
+-- Posts Policies
+create policy "Public read access for posts"
+on public.posts for select
+to anon, authenticated
+using (true);
+
+create policy "Authenticated users can insert posts"
+on public.posts for insert
+to authenticated
+with check (true);
+
+create policy "Authenticated users can update likes"
+on public.posts for update
+to authenticated
+using (true)
+with check (true);
+
+-- Storage Policies (product-images)
+-- Allow public read access to files
+create policy "Public Access"
+on storage.objects for select
+to public
+using ( bucket_id = 'product-images' );
+
+-- Allow authenticated users to upload files
+create policy "Authenticated Upload"
+on storage.objects for insert
+to authenticated
+with check ( bucket_id = 'product-images' );

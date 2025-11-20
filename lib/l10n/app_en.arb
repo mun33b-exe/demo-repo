@@ -1,0 +1,118 @@
+{
+  "@@locale": "en",
+  "appTitle": "SmartFarm",
+  "@appTitle": {
+    "description": "The application title"
+  },
+  "home": "Home",
+  "market": "Market",
+  "community": "Community",
+  "profile": "Profile",
+  "login": "Login",
+  "signUp": "Sign Up",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "signIn": "Sign In",
+  "createAccount": "Create Account",
+  "alreadyHaveAccount": "Already have an account?",
+  "dontHaveAccount": "Don't have an account?",
+  "signOut": "Sign Out",
+  "theme": "Theme",
+  "language": "Language",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "english": "English",
+  "urdu": "Urdu (اردو)",
+  "farmer": "Farmer",
+  "noEmail": "No Email",
+  "marketplace": "Marketplace",
+  "allProducts": "All Products",
+  "myProducts": "My Products",
+  "noProductsAvailable": "No products available in the market.",
+  "beFirstToList": "Be the first to list a product!",
+  "haventListedProducts": "You haven't listed any products yet.",
+  "tapToAddProduct": "Tap the + button to add your first product!",
+  "errorLoadingProducts": "Error loading products",
+  "sellProduct": "Sell Product",
+  "editProduct": "Edit Product",
+  "productName": "Product Name",
+  "description": "Description",
+  "pricePkr": "Price (PKR)",
+  "listProduct": "List Product",
+  "updateProduct": "Update Product",
+  "pleaseSelectImage": "Please select an image",
+  "productAddedSuccess": "Product added successfully!",
+  "productUpdatedSuccess": "Product updated successfully!",
+  "productDeletedSuccess": "Product deleted successfully!",
+  "errorDeletingProduct": "Error deleting product: {error}",
+  "@errorDeletingProduct": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteProduct": "Delete Product",
+  "confirmDeleteProduct": "Are you sure you want to delete this product?",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "seller": "Seller",
+  "unknown": "Unknown",
+  "communityTitle": "Community",
+  "feed": "Feed",
+  "myPosts": "My Posts",
+  "noPostsYet": "No posts yet. Be the first!",
+  "startConversation": "Start a conversation by posting below!",
+  "haventPosted": "You haven't posted anything yet.",
+  "shareThoughts": "Share your thoughts with the community!",
+  "errorLoadingPosts": "Error loading posts",
+  "askSomething": "Ask something...",
+  "likes": "Likes",
+  "edit": "Edit",
+  "editPost": "Edit Post",
+  "enterNewContent": "Enter new content",
+  "update": "Update",
+  "postUpdatedSuccess": "Post updated successfully!",
+  "errorUpdatingPost": "Error updating post: {error}",
+  "@errorUpdatingPost": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "postDeletedSuccess": "Post deleted successfully!",
+  "errorDeletingPost": "Error deleting post: {error}",
+  "@errorDeletingPost": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deletePost": "Delete Post",
+  "confirmDeletePost": "Are you sure you want to delete this post?",
+  "errorUpdatingLike": "Error updating like: {error}",
+  "@errorUpdatingLike": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "weather": "Weather",
+  "cropGuidance": "Crop Guidance",
+  "governmentSchemes": "Government Schemes",
+  "wheat": "Wheat",
+  "rice": "Rice",
+  "cotton": "Cotton",
+  "currentTemperature": "Current Temperature",
+  "today": "Today",
+  "pleaseEnterName": "Please enter a name",
+  "pleaseEnterPrice": "Please enter a price",
+  "error": "Error",
+  "userNotLoggedIn": "User not logged in"
+}
+
